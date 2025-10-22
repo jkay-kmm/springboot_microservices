@@ -1,9 +1,15 @@
 package com.anhtrung.learn_spring.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 
 public class UserCreationRequest {
+    @NotBlank(message = "Tên không được để trống")
+    @Size(min = 2, max = 50, message = "USERNAME_INVALID")
     private String username;
+    @Size(min = 8, message = "INVALID_PASSWORD")
     private String password;
     private String lastname;
     private String firstname;

@@ -1,9 +1,11 @@
 package com.anhtrung.learn_spring.controller;
 
+import com.anhtrung.learn_spring.dto.request.ApiResponse;
 import com.anhtrung.learn_spring.dto.request.UserCreationRequest;
 import com.anhtrung.learn_spring.dto.request.UserUpdateRequest;
 import com.anhtrung.learn_spring.entity.User;
 import com.anhtrung.learn_spring.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +17,10 @@ public class UserController {
     @Autowired
     private UserService userService;
     @PostMapping
-    User createUser(@RequestBody UserCreationRequest request) {
-        return userService.createUser(request);
+    ApiResponse<User> createUser(@RequestBody  @Valid  UserCreationRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.createUser(request));
+        return apiResponse;
     }
     @GetMapping
     List<User> getAllUsers() {
