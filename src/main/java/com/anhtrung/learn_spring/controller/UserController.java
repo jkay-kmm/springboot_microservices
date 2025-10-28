@@ -1,5 +1,6 @@
 package com.anhtrung.learn_spring.controller;
 
+import com.anhtrung.learn_spring.dto.reponse.UserReponse;
 import com.anhtrung.learn_spring.dto.request.ApiResponse;
 import com.anhtrung.learn_spring.dto.request.UserCreationRequest;
 import com.anhtrung.learn_spring.dto.request.UserUpdateRequest;
@@ -27,11 +28,11 @@ public class UserController {
       return   userService.getUsers();
     }
     @GetMapping("/{userId}")
-    User getUser(@PathVariable String userId) {
+    UserReponse getUser(@PathVariable String userId) {
         return userService.getUser(userId);
     }
     @PutMapping("/{userId}")
-   User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+   UserReponse updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(userId, request);
     }
     @DeleteMapping("/{userId}")

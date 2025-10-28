@@ -14,6 +14,12 @@ java {
     }
 }
 
+ext {
+    // Khai báo version tập trung (đổi ở đây khi cần)
+    mapstructVersion = '1.6.3'     // hoặc bản ổn gần đây
+    lombokBindingVersion = '0.2.0'       // lombok-mapstruct-binding
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -25,17 +31,38 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Lombok
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // MapStruct
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+    // Fix xung đột Lombok <-> MapStruct (bắt buộc nếu dùng @Builder, @With, v.v.)
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokBindingVersion}"
+
+    // DB
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // Dev / Test
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+tasks.named('compileJava') {
+    options.annotationProcessorPath = configurations.annotationProcessor
+    options.compilerArgs += [
+            '-Amapstruct.defaultComponentModel=spring',   // để @Mapper dùng Spring (@Component)
+            '-parameters'
+    ]
+}
 
 tasks.named('test') {
     useJUnitPlatform()
