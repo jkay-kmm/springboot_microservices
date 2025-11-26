@@ -42,6 +42,10 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    //Oauth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
+
     // MapStruct
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
@@ -56,6 +60,9 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // JWT - Nimbus JOSE + JWT
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
+
 }
 
 tasks.named('compileJava') {

@@ -1,4 +1,5 @@
-package com.anhtrung.learn_spring.dto.reponse;
+package com.anhtrung.learn_spring.dto.request;
+
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +9,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationReponse {
+public class IntrospectRequest {
     String token;
-    boolean authenticated;
 }

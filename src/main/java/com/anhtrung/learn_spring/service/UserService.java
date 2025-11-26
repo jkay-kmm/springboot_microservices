@@ -1,58 +1,76 @@
 package com.anhtrung.learn_spring.service;
-
-import com.anhtrung.learn_spring.dto.reponse.UserReponse;
+import com.anhtrung.learn_spring.dto.reponse.UserResponse;
 import com.anhtrung.learn_spring.dto.request.UserCreationRequest;
 import com.anhtrung.learn_spring.dto.request.UserUpdateRequest;
 import com.anhtrung.learn_spring.entity.User;
+import com.anhtrung.learn_spring.enums.Role;
 import com.anhtrung.learn_spring.exception.AppException;
 import com.anhtrung.learn_spring.exception.ErrorCode;
 import com.anhtrung.learn_spring.mapper.UserMapper;
 import com.anhtrung.learn_spring.repository.UserRepository;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
-
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserMapper userMapper;
-    public User createUser(UserCreationRequest request) {
+     UserRepository userRepository;
+     UserMapper userMapper;
+     PasswordEncoder passwordEncoder;
 
+    public UserResponse createUser(UserCreationRequest request){
+        if (userRepository.existsByUsername(request.getUsername()))
+            throw new AppException(ErrorCode.USER_EXISTED);
 
-        if(userRepository.existsByUsername(request.getUsername())) {
-            throw  new AppException(ErrorCode.USER_EXISTED);
-        }
         User user = userMapper.toUser(request);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
 
-       return userRepository.save(user);
-    }
-    public List<User> getUsers() {
-        return userRepository.findAll();
-    }
+        user.setRoles(roles);
 
-
-    public UserReponse getUser(String id) {
-         return userMapper.toUserReponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    public UserResponse updateUser(String userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-    public UserReponse updateUser(String userId, UserUpdateRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-       userMapper.updateUser(user, request);
-        return userMapper.toUserReponse(userRepository.save(user));
+        userMapper.updateUser(user, request);
+
+        return userMapper.toUserResponse(userRepository.save(user));
     }
+    public List<UserResponse> getUsers(){
 
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse).toList();
+    }
+    public UserResponse getUser(String id){
+
+        return userMapper.toUserResponse(userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
+    }
 
     public void  deleteUser(String userId) {
         userRepository.deleteById(userId);
+    }
+
+    public UserResponse getMyInfo(){
+        var context = SecurityContextHolder.getContext();
+        String name = context.getAuthentication().getName();
+
+        User user = userRepository.findByUsername(name).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return userMapper.toUserResponse(user);
     }
 }
